@@ -26,7 +26,7 @@ export const validateRequest = (
         ...options,
     };
 
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction): void => {
         try {
             const errors: string[] = [];
 
@@ -83,9 +83,10 @@ export const validateRequest = (
             }
 
             if (errors.length > 0) {
-                return res.status(HTTP_STATUS.BAD_REQUEST).json(
+                res.status(HTTP_STATUS.BAD_REQUEST).json(
                     errorResponse(`Validation error: ${errors.join(", ")}`, "VALIDATION_ERROR")
                 );
+                return; // Just return, don't return the response
             }
 
             next();
@@ -95,6 +96,7 @@ export const validateRequest = (
             res.status(HTTP_STATUS.BAD_REQUEST).json(
                 errorResponse((error as Error).message, "VALIDATION_ERROR")
             );
+            return; // Just return, don't return the response
         }
     };
 };
