@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ObjectSchema } from "joi";
 import { HTTP_STATUS } from "../../../constants/httpConstants";
-import { successResponse } from "../models/responseModel";
+import { errorResponse } from "../models/responseModel";
 
 interface RequestSchemas {
     body?: ObjectSchema;
@@ -47,7 +47,9 @@ export const validateRequest = (
                             (detail) => `${partName}: ${detail.message}`
                         )
                     );
-                } else if (shouldStrip) {
+                }
+                
+                else if (shouldStrip) {
                     return value;
                 }
                 return data;
@@ -81,16 +83,18 @@ export const validateRequest = (
             }
 
             if (errors.length > 0) {
-                return res.status(HTTP_STATUS.BAD_REQUEST).json({
-                    error: `Validation error: ${errors.join(", ")}`,
-                });
+                return res.status(HTTP_STATUS.BAD_REQUEST).json(
+                    errorResponse(`Validation error: ${errors.join(", ")}`, "VALIDATION_ERROR")
+                );
             }
 
             next();
-        } catch (error) {
-            res.status(HTTP_STATUS.BAD_REQUEST).json({
-                error: (error as Error).message,
-            });
+        }
+        
+        catch (error) {
+            res.status(HTTP_STATUS.BAD_REQUEST).json(
+                errorResponse((error as Error).message, "VALIDATION_ERROR")
+            );
         }
     };
 };

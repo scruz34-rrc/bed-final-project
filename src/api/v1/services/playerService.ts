@@ -7,7 +7,9 @@ export const getAllPlayers = async (teamId?: string): Promise<Player[]> => {
     let snapshot;
     if (teamId) {
         snapshot = await repository.queryDocuments(COLLECTION, "teamId", "==", teamId);
-    } else {
+    }
+    
+    else {
         snapshot = await repository.getDocuments(COLLECTION);
     }
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Player));
