@@ -4,6 +4,8 @@
     "main": "index.js",
     "scripts": {
         "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
         "start": "ts-node src/server.ts",
         "generate-docs": "ts-node scripts/generate-openapi.ts && npx @redocly/cli build-docs openapi.json --output docs/index.html"
     },
