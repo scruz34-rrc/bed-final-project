@@ -5,6 +5,7 @@
     "scripts": {
         "test": "jest",
         "start": "ts-node src/server.ts"
+        "generate-docs": "ts-node scripts/generate-openapi.ts && npx @redocly/cli build-docs openapi.json --output docs/index.html"
     },
     "keywords": [],
     "author": "",
