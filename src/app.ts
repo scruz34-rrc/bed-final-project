@@ -1,6 +1,23 @@
 import express, { Express } from "express";
+import dotenv from "dotenv";
+import helmet from "helmet";
+import cors from "cors";
+
+dotenv.config();
+
+import teamRoutes from "./api/v1/routes/teamRoutes";
+import playerRoutes from "./api/v1/routes/playerRoutes";
+import statRoutes from "./api/v1/routes/statRoutes";
 
 const app: Express = express();
+
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+
+app.use("/api/v1/teams", teamRoutes);
+app.use("/api/v1/players", playerRoutes);
+app.use("/api/v1/stats", statRoutes);
 
 app.get("/", (req, res) => {
     res.send("Hello, World!");
