@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as statController from "../controllers/statController";
 import { validateRequest } from "../middleware/validate";
 import { createStatSchema, updateStatSchema, statIdParamSchema, playerStatsParamSchema } from "../validations/statValidation";
+import { standardLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
 
@@ -35,8 +36,29 @@ const router = Router();
  *                     $ref: '#/components/schemas/StatLine'
  *                 message:
  *                   type: string
+ *       '429':
+ *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
-router.get("/player/:playerId", validateRequest({ params: playerStatsParamSchema }), statController.getStatsByPlayer);
+router.get("/player/:playerId", standardLimiter, validateRequest({ params: playerStatsParamSchema }), statController.getStatsByPlayer);
 
 /**
  * @openapi
@@ -67,8 +89,29 @@ router.get("/player/:playerId", validateRequest({ params: playerStatsParamSchema
  *                   type: string
  *       '404':
  *         description: Stat line not found
+ *       '429':
+ *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
-router.get("/:id", validateRequest({ params: statIdParamSchema }), statController.getStatById);
+router.get("/:id", standardLimiter, validateRequest({ params: statIdParamSchema }), statController.getStatById);
 
 /**
  * @openapi
@@ -105,6 +148,7 @@ router.get("/:id", validateRequest({ params: statIdParamSchema }), statControlle
  *                   type: string
  *       '400':
  *         description: Invalid input data
+ *       
  */
 router.post("/player/:playerId", validateRequest({ params: playerStatsParamSchema, body: createStatSchema }), statController.createStat);
 

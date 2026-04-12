@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as teamController from "../controllers/teamController";
 import { validateRequest } from "../middleware/validate";
 import { createTeamSchema, updateTeamSchema, teamIdParamSchema } from "../validations/teamValidation";
+import { standardLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
 
@@ -27,8 +28,29 @@ const router = Router();
  *                     $ref: '#/components/schemas/Team'
  *                 message:
  *                   type: string
+ *       '429':
+ *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
-router.get("/", teamController.getAllTeams);
+router.get("/", standardLimiter, teamController.getAllTeams);
 
 /**
  * @openapi
@@ -59,8 +81,29 @@ router.get("/", teamController.getAllTeams);
  *                   type: string
  *       '404':
  *         description: Team not found
+ *       '429':
+ *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
-router.get("/:id", validateRequest({ params: teamIdParamSchema }), teamController.getTeamById);
+router.get("/:id", standardLimiter, validateRequest({ params: teamIdParamSchema }), teamController.getTeamById);
 
 /**
  * @openapi

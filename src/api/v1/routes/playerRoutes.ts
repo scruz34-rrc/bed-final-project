@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as playerController from "../controllers/playerController";
 import { validateRequest } from "../middleware/validate";
 import { createPlayerSchema, updatePlayerSchema, playerIdParamSchema } from "../validations/playerValidation";
+import { standardLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
 
@@ -34,8 +35,29 @@ const router = Router();
  *                     $ref: '#/components/schemas/Player'
  *                 message:
  *                   type: string
+ *       '429':
+ *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
-router.get("/", playerController.getAllPlayers);
+router.get("/", standardLimiter, playerController.getAllPlayers);
 
 /**
  * @openapi
@@ -66,8 +88,29 @@ router.get("/", playerController.getAllPlayers);
  *                   type: string
  *       '404':
  *         description: Player not found
+ *       '429':
+ *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
-router.get("/:id", validateRequest({ params: playerIdParamSchema }), playerController.getPlayerById);
+router.get("/:id", standardLimiter, validateRequest({ params: playerIdParamSchema }), playerController.getPlayerById);
 
 /**
  * @openapi

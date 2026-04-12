@@ -2,7 +2,7 @@ module.exports = {
     preset: "ts-jest",
     testEnvironment: "node",
     testMatch: ["**/tests/unit/**/*.test.ts"],
-    setupFiles: ["<rootDir>/tests/jest.setup.ts"],
+    setupFilesAfterEnv: ["<rootDir>/tests/jest.setup.ts"], // Changed from setupFiles
     collectCoverageFrom: [
         "src/api/v1/controllers/**/*.ts",
         "src/api/v1/services/**/*.ts",

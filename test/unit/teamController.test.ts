@@ -1,4 +1,30 @@
-// Mock the service FIRST - before any imports
+// Mock firebaseConfig FIRST - before any other imports
+jest.mock("../../config/firebaseConfig", () => ({
+    db: {
+        collection: jest.fn().mockReturnThis(),
+        doc: jest.fn().mockReturnThis(),
+        get: jest.fn().mockResolvedValue({ docs: [] }),
+        add: jest.fn().mockResolvedValue({ id: "mock-id" }),
+        update: jest.fn().mockResolvedValue(undefined),
+        delete: jest.fn().mockResolvedValue(undefined),
+        where: jest.fn().mockReturnThis(),
+    },
+    auth: {
+        verifyIdToken: jest.fn().mockResolvedValue({ uid: "test-uid" }),
+    },
+}));
+
+// Mock the repository
+jest.mock("../../src/api/v1/repositories/firestoreRepository", () => ({
+    createDocument: jest.fn().mockResolvedValue("mock-id"),
+    getDocuments: jest.fn().mockResolvedValue({ docs: [] }),
+    getDocumentById: jest.fn().mockResolvedValue(null),
+    updateDocument: jest.fn().mockResolvedValue(undefined),
+    deleteDocument: jest.fn().mockResolvedValue(undefined),
+    queryDocuments: jest.fn().mockResolvedValue({ docs: [] }),
+}));
+
+// Mock the service
 jest.mock("../../src/api/v1/services/teamService");
 
 import { Request, Response, NextFunction } from "express";

@@ -1,9 +1,24 @@
-// Mock the repository FIRST - before any imports
+// Mock firebaseConfig FIRST - before any other imports
+jest.mock("../../config/firebaseConfig", () => ({
+    db: {
+        collection: jest.fn().mockReturnThis(),
+        doc: jest.fn().mockReturnThis(),
+        get: jest.fn().mockResolvedValue({ docs: [] }),
+        add: jest.fn().mockResolvedValue({ id: "mock-id" }),
+        update: jest.fn().mockResolvedValue(undefined),
+        delete: jest.fn().mockResolvedValue(undefined),
+        where: jest.fn().mockReturnThis(),
+    },
+    auth: {
+        verifyIdToken: jest.fn().mockResolvedValue({ uid: "test-uid" }),
+    },
+}));
+
+// Mock the repository
 jest.mock("../../src/api/v1/repositories/firestoreRepository");
 
 import * as teamService from "../../src/api/v1/services/teamService";
 import * as repository from "../../src/api/v1/repositories/firestoreRepository";
-import { Team } from "../../src/api/v1/models/teamModel";
 
 describe("TeamService", () => {
     beforeEach(() => {
