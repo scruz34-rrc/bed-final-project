@@ -47,9 +47,7 @@ export const validateRequest = (
                             (detail) => `${partName}: ${detail.message}`
                         )
                     );
-                }
-                
-                else if (shouldStrip) {
+                } else if (shouldStrip) {
                     return value;
                 }
                 return data;
@@ -86,17 +84,12 @@ export const validateRequest = (
                 res.status(HTTP_STATUS.BAD_REQUEST).json(
                     errorResponse(`Validation error: ${errors.join(", ")}`, "VALIDATION_ERROR")
                 );
-                return; // Just return, don't return the response
+                return;
             }
 
             next();
-        }
-        
-        catch (error) {
-            res.status(HTTP_STATUS.BAD_REQUEST).json(
-                errorResponse((error as Error).message, "VALIDATION_ERROR")
-            );
-            return; // Just return, don't return the response
+        } catch (error) {
+            next(error);
         }
     };
 };

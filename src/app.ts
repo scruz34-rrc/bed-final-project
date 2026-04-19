@@ -10,6 +10,7 @@ import playerRoutes from "./api/v1/routes/playerRoutes";
 import statRoutes from "./api/v1/routes/statRoutes";
 import setupSwagger from "../config/swagger";
 import errorHandler from "./api/v1/middleware/errorHandler";
+import adminRoutes from "./api/v1/routes/adminRoutes";
 
 const app: Express = express();
 
@@ -22,6 +23,7 @@ setupSwagger(app);
 app.use("/api/v1/teams", teamRoutes);
 app.use("/api/v1/players", playerRoutes);
 app.use("/api/v1/stats", statRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 app.get("/", (req, res) => {
     res.send("Hello, World!");
