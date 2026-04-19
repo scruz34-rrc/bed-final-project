@@ -3,6 +3,8 @@ import * as teamController from "../controllers/teamController";
 import { validateRequest } from "../middleware/validate";
 import { createTeamSchema, updateTeamSchema, teamIdParamSchema } from "../validations/teamValidation";
 import { standardLimiter } from "../middleware/rateLimiter";
+import authenticate from "../middleware/authenticate";
+import isAuthorized from "../middleware/authorize";
 
 const router = Router();
 
@@ -15,40 +17,8 @@ const router = Router();
  *     responses:
  *       '200':
  *         description: Successfully retrieved teams
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Team'
- *                 message:
- *                   type: string
  *       '429':
  *         description: Rate limit exceeded
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Too many requests, please try again later."
- *                     code:
- *                       type: string
- *                       example: "RATE_LIMIT_EXCEEDED"
- *                 timestamp:
- *                   type: string
  */
 router.get("/", standardLimiter, teamController.getAllTeams);
 
@@ -68,40 +38,10 @@ router.get("/", standardLimiter, teamController.getAllTeams);
  *     responses:
  *       '200':
  *         description: Successfully retrieved team
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/Team'
- *                 message:
- *                   type: string
  *       '404':
  *         description: Team not found
  *       '429':
  *         description: Rate limit exceeded
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Too many requests, please try again later."
- *                     code:
- *                       type: string
- *                       example: "RATE_LIMIT_EXCEEDED"
- *                 timestamp:
- *                   type: string
  */
 router.get("/:id", standardLimiter, validateRequest({ params: teamIdParamSchema }), teamController.getTeamById);
 
@@ -111,6 +51,8 @@ router.get("/:id", standardLimiter, validateRequest({ params: teamIdParamSchema 
  *   post:
  *     summary: Create a new team
  *     tags: [Teams]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -120,21 +62,14 @@ router.get("/:id", standardLimiter, validateRequest({ params: teamIdParamSchema 
  *     responses:
  *       '201':
  *         description: Team created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/Team'
- *                 message:
- *                   type: string
  *       '400':
  *         description: Invalid input data
+ *       '401':
+ *         description: Unauthorized - No token provided
+ *       '403':
+ *         description: Forbidden - Insufficient role
  */
-router.post("/", validateRequest({ body: createTeamSchema }), teamController.createTeam);
+router.post("/", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin", "manager"] }), validateRequest({ body: createTeamSchema }), teamController.createTeam);
 
 /**
  * @openapi
@@ -142,6 +77,8 @@ router.post("/", validateRequest({ body: createTeamSchema }), teamController.cre
  *   put:
  *     summary: Update an existing team
  *     tags: [Teams]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -158,23 +95,16 @@ router.post("/", validateRequest({ body: createTeamSchema }), teamController.cre
  *     responses:
  *       '200':
  *         description: Team updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/Team'
- *                 message:
- *                   type: string
- *       '404':
- *         description: Team not found
  *       '400':
  *         description: Invalid input data
+ *       '401':
+ *         description: Unauthorized - No token provided
+ *       '403':
+ *         description: Forbidden - Insufficient role
+ *       '404':
+ *         description: Team not found
  */
-router.put("/:id", validateRequest({ params: teamIdParamSchema, body: updateTeamSchema }), teamController.updateTeam);
+router.put("/:id", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin", "manager"] }), validateRequest({ params: teamIdParamSchema, body: updateTeamSchema }), teamController.updateTeam);
 
 /**
  * @openapi
@@ -182,6 +112,8 @@ router.put("/:id", validateRequest({ params: teamIdParamSchema, body: updateTeam
  *   delete:
  *     summary: Delete a team
  *     tags: [Teams]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -192,9 +124,13 @@ router.put("/:id", validateRequest({ params: teamIdParamSchema, body: updateTeam
  *     responses:
  *       '200':
  *         description: Team deleted successfully
+ *       '401':
+ *         description: Unauthorized - No token provided
+ *       '403':
+ *         description: Forbidden - Insufficient role
  *       '404':
  *         description: Team not found
  */
-router.delete("/:id", validateRequest({ params: teamIdParamSchema }), teamController.deleteTeam);
+router.delete("/:id", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin"] }), validateRequest({ params: teamIdParamSchema }), teamController.deleteTeam);
 
 export default router;

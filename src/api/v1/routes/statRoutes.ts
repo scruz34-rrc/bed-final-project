@@ -3,9 +3,10 @@ import * as statController from "../controllers/statController";
 import { validateRequest } from "../middleware/validate";
 import { createStatSchema, updateStatSchema, statIdParamSchema, playerStatsParamSchema } from "../validations/statValidation";
 import { standardLimiter } from "../middleware/rateLimiter";
+import authenticate from "../middleware/authenticate";
+import isAuthorized from "../middleware/authorize";
 
 const router = Router();
-
 
 /**
  * @openapi
@@ -23,40 +24,8 @@ const router = Router();
  *     responses:
  *       '200':
  *         description: Successfully retrieved player stats
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/StatLine'
- *                 message:
- *                   type: string
  *       '429':
  *         description: Rate limit exceeded
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Too many requests, please try again later."
- *                     code:
- *                       type: string
- *                       example: "RATE_LIMIT_EXCEEDED"
- *                 timestamp:
- *                   type: string
  */
 router.get("/player/:playerId", standardLimiter, validateRequest({ params: playerStatsParamSchema }), statController.getStatsByPlayer);
 
@@ -76,40 +45,10 @@ router.get("/player/:playerId", standardLimiter, validateRequest({ params: playe
  *     responses:
  *       '200':
  *         description: Successfully retrieved stat line
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/StatLine'
- *                 message:
- *                   type: string
  *       '404':
  *         description: Stat line not found
  *       '429':
  *         description: Rate limit exceeded
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Too many requests, please try again later."
- *                     code:
- *                       type: string
- *                       example: "RATE_LIMIT_EXCEEDED"
- *                 timestamp:
- *                   type: string
  */
 router.get("/:id", standardLimiter, validateRequest({ params: statIdParamSchema }), statController.getStatById);
 
@@ -119,6 +58,8 @@ router.get("/:id", standardLimiter, validateRequest({ params: statIdParamSchema 
  *   post:
  *     summary: Create a new stat line for a player
  *     tags: [Stats]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: playerId
  *         in: path
@@ -135,22 +76,14 @@ router.get("/:id", standardLimiter, validateRequest({ params: statIdParamSchema 
  *     responses:
  *       '201':
  *         description: Stat line created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/StatLine'
- *                 message:
- *                   type: string
  *       '400':
  *         description: Invalid input data
- *       
+ *       '401':
+ *         description: Unauthorized - No token provided
+ *       '403':
+ *         description: Forbidden - Insufficient role
  */
-router.post("/player/:playerId", validateRequest({ params: playerStatsParamSchema, body: createStatSchema }), statController.createStat);
+router.post("/player/:playerId", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin", "manager"] }), validateRequest({ params: playerStatsParamSchema, body: createStatSchema }), statController.createStat);
 
 /**
  * @openapi
@@ -158,6 +91,8 @@ router.post("/player/:playerId", validateRequest({ params: playerStatsParamSchem
  *   put:
  *     summary: Update an existing stat line
  *     tags: [Stats]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -174,23 +109,16 @@ router.post("/player/:playerId", validateRequest({ params: playerStatsParamSchem
  *     responses:
  *       '200':
  *         description: Stat line updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/StatLine'
- *                 message:
- *                   type: string
- *       '404':
- *         description: Stat line not found
  *       '400':
  *         description: Invalid input data
+ *       '401':
+ *         description: Unauthorized - No token provided
+ *       '403':
+ *         description: Forbidden - Insufficient role
+ *       '404':
+ *         description: Stat line not found
  */
-router.put("/:id", validateRequest({ params: statIdParamSchema, body: updateStatSchema }), statController.updateStat);
+router.put("/:id", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin", "manager"] }), validateRequest({ params: statIdParamSchema, body: updateStatSchema }), statController.updateStat);
 
 /**
  * @openapi
@@ -198,6 +126,8 @@ router.put("/:id", validateRequest({ params: statIdParamSchema, body: updateStat
  *   delete:
  *     summary: Delete a stat line
  *     tags: [Stats]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -208,9 +138,13 @@ router.put("/:id", validateRequest({ params: statIdParamSchema, body: updateStat
  *     responses:
  *       '200':
  *         description: Stat line deleted successfully
+ *       '401':
+ *         description: Unauthorized - No token provided
+ *       '403':
+ *         description: Forbidden - Insufficient role
  *       '404':
  *         description: Stat line not found
  */
-router.delete("/:id", validateRequest({ params: statIdParamSchema }), statController.deleteStat);
+router.delete("/:id", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin"] }), validateRequest({ params: statIdParamSchema }), statController.deleteStat);
 
 export default router;

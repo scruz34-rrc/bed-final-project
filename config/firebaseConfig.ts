@@ -4,9 +4,10 @@ import {
     getApps,
     App,
     AppOptions,
-    ServiceAccount
+    ServiceAccount,
 } from "firebase-admin/app";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
+import { getAuth, Auth } from "firebase-admin/auth";
 
 const getFirebaseConfig = (): AppOptions => {
     const {
@@ -47,5 +48,6 @@ const initializeFirebaseAdmin = (): App => {
 const app: App = initializeFirebaseAdmin();
 
 const db: Firestore = getFirestore(app);
+const auth: Auth = getAuth(app);
 
-export { db };
+export { db, auth };
