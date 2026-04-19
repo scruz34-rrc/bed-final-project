@@ -31,14 +31,35 @@ const router = Router();
  *               properties:
  *                 status:
  *                   type: string
+ *                   example: "success"
+ *                 message:
+ *                   type: string
+ *                   example: "Players retrieved successfully"
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Player'
- *                 message:
- *                   type: string
  *       '429':
  *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
 router.get("/", standardLimiter, playerController.getAllPlayers);
 
@@ -65,14 +86,54 @@ router.get("/", standardLimiter, playerController.getAllPlayers);
  *               properties:
  *                 status:
  *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/Player'
+ *                   example: "success"
  *                 message:
  *                   type: string
+ *                   example: "Player retrieved successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Player'
  *       '404':
  *         description: Player not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Player not found"
+ *                     code:
+ *                       type: string
+ *                       example: "PLAYER_NOT_FOUND"
+ *                 timestamp:
+ *                   type: string
  *       '429':
  *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
 router.get("/:id", standardLimiter, validateRequest({ params: playerIdParamSchema }), playerController.getPlayerById);
 
@@ -100,16 +161,95 @@ router.get("/:id", standardLimiter, validateRequest({ params: playerIdParamSchem
  *               properties:
  *                 status:
  *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/Player'
+ *                   example: "success"
  *                 message:
  *                   type: string
+ *                   example: "Player created successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Player'
  *       '400':
  *         description: Invalid input data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                     code:
+ *                       type: string
+ *                       example: "VALIDATION_ERROR"
+ *                 timestamp:
+ *                   type: string
  *       '401':
  *         description: Unauthorized - No token provided
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Unauthorized: No token provided"
+ *                     code:
+ *                       type: string
+ *                       example: "TOKEN_NOT_FOUND"
+ *                 timestamp:
+ *                   type: string
  *       '403':
  *         description: Forbidden - Insufficient role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Forbidden: Insufficient role"
+ *                     code:
+ *                       type: string
+ *                       example: "INSUFFICIENT_ROLE"
+ *                 timestamp:
+ *                   type: string
+ *       '429':
+ *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
 router.post("/", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin", "manager"] }), validateRequest({ body: createPlayerSchema }), playerController.createPlayer);
 
@@ -137,14 +277,123 @@ router.post("/", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin"
  *     responses:
  *       '200':
  *         description: Player updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
+ *                   type: string
+ *                   example: "Player updated successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Player'
  *       '400':
  *         description: Invalid input data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                     code:
+ *                       type: string
+ *                       example: "VALIDATION_ERROR"
+ *                 timestamp:
+ *                   type: string
  *       '401':
  *         description: Unauthorized - No token provided
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Unauthorized: No token provided"
+ *                     code:
+ *                       type: string
+ *                       example: "TOKEN_NOT_FOUND"
+ *                 timestamp:
+ *                   type: string
  *       '403':
  *         description: Forbidden - Insufficient role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Forbidden: Insufficient role"
+ *                     code:
+ *                       type: string
+ *                       example: "INSUFFICIENT_ROLE"
+ *                 timestamp:
+ *                   type: string
  *       '404':
  *         description: Player not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Player not found"
+ *                     code:
+ *                       type: string
+ *                       example: "PLAYER_NOT_FOUND"
+ *                 timestamp:
+ *                   type: string
+ *       '429':
+ *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
 router.put("/:id", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin", "manager"] }), validateRequest({ params: playerIdParamSchema, body: updatePlayerSchema }), playerController.updatePlayer);
 
@@ -166,12 +415,105 @@ router.put("/:id", standardLimiter, authenticate, isAuthorized({ hasRole: ["admi
  *     responses:
  *       '200':
  *         description: Player deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
+ *                   type: string
+ *                   example: "Player deleted successfully"
+ *                 data:
+ *                   type: object
+ *                   nullable: true
+ *                   example: null
  *       '401':
  *         description: Unauthorized - No token provided
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Unauthorized: No token provided"
+ *                     code:
+ *                       type: string
+ *                       example: "TOKEN_NOT_FOUND"
+ *                 timestamp:
+ *                   type: string
  *       '403':
  *         description: Forbidden - Insufficient role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Forbidden: Insufficient role"
+ *                     code:
+ *                       type: string
+ *                       example: "INSUFFICIENT_ROLE"
+ *                 timestamp:
+ *                   type: string
  *       '404':
  *         description: Player not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Player not found"
+ *                     code:
+ *                       type: string
+ *                       example: "PLAYER_NOT_FOUND"
+ *                 timestamp:
+ *                   type: string
+ *       '429':
+ *         description: Rate limit exceeded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Too many requests, please try again later."
+ *                     code:
+ *                       type: string
+ *                       example: "RATE_LIMIT_EXCEEDED"
+ *                 timestamp:
+ *                   type: string
  */
 router.delete("/:id", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin"] }), validateRequest({ params: playerIdParamSchema }), playerController.deletePlayer);
 
