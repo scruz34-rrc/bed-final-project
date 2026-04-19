@@ -3,6 +3,8 @@ import * as playerController from "../controllers/playerController";
 import { validateRequest } from "../middleware/validate";
 import { createPlayerSchema, updatePlayerSchema, playerIdParamSchema } from "../validations/playerValidation";
 import { standardLimiter } from "../middleware/rateLimiter";
+import authenticate from "../middleware/authenticate";
+import isAuthorized from "../middleware/authorize";
 
 const router = Router();
 
@@ -37,25 +39,6 @@ const router = Router();
  *                   type: string
  *       '429':
  *         description: Rate limit exceeded
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Too many requests, please try again later."
- *                     code:
- *                       type: string
- *                       example: "RATE_LIMIT_EXCEEDED"
- *                 timestamp:
- *                   type: string
  */
 router.get("/", standardLimiter, playerController.getAllPlayers);
 
@@ -90,25 +73,6 @@ router.get("/", standardLimiter, playerController.getAllPlayers);
  *         description: Player not found
  *       '429':
  *         description: Rate limit exceeded
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Too many requests, please try again later."
- *                     code:
- *                       type: string
- *                       example: "RATE_LIMIT_EXCEEDED"
- *                 timestamp:
- *                   type: string
  */
 router.get("/:id", standardLimiter, validateRequest({ params: playerIdParamSchema }), playerController.getPlayerById);
 
@@ -118,6 +82,8 @@ router.get("/:id", standardLimiter, validateRequest({ params: playerIdParamSchem
  *   post:
  *     summary: Create a new player
  *     tags: [Players]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -140,8 +106,12 @@ router.get("/:id", standardLimiter, validateRequest({ params: playerIdParamSchem
  *                   type: string
  *       '400':
  *         description: Invalid input data
+ *       '401':
+ *         description: Unauthorized - No token provided
+ *       '403':
+ *         description: Forbidden - Insufficient role
  */
-router.post("/", validateRequest({ body: createPlayerSchema }), playerController.createPlayer);
+router.post("/", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin", "manager"] }), validateRequest({ body: createPlayerSchema }), playerController.createPlayer);
 
 /**
  * @openapi
@@ -149,6 +119,8 @@ router.post("/", validateRequest({ body: createPlayerSchema }), playerController
  *   put:
  *     summary: Update an existing player
  *     tags: [Players]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -165,23 +137,16 @@ router.post("/", validateRequest({ body: createPlayerSchema }), playerController
  *     responses:
  *       '200':
  *         description: Player updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/Player'
- *                 message:
- *                   type: string
- *       '404':
- *         description: Player not found
  *       '400':
  *         description: Invalid input data
+ *       '401':
+ *         description: Unauthorized - No token provided
+ *       '403':
+ *         description: Forbidden - Insufficient role
+ *       '404':
+ *         description: Player not found
  */
-router.put("/:id", validateRequest({ params: playerIdParamSchema, body: updatePlayerSchema }), playerController.updatePlayer);
+router.put("/:id", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin", "manager"] }), validateRequest({ params: playerIdParamSchema, body: updatePlayerSchema }), playerController.updatePlayer);
 
 /**
  * @openapi
@@ -189,6 +154,8 @@ router.put("/:id", validateRequest({ params: playerIdParamSchema, body: updatePl
  *   delete:
  *     summary: Delete a player
  *     tags: [Players]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -199,9 +166,13 @@ router.put("/:id", validateRequest({ params: playerIdParamSchema, body: updatePl
  *     responses:
  *       '200':
  *         description: Player deleted successfully
+ *       '401':
+ *         description: Unauthorized - No token provided
+ *       '403':
+ *         description: Forbidden - Insufficient role
  *       '404':
  *         description: Player not found
  */
-router.delete("/:id", validateRequest({ params: playerIdParamSchema }), playerController.deletePlayer);
+router.delete("/:id", standardLimiter, authenticate, isAuthorized({ hasRole: ["admin"] }), validateRequest({ params: playerIdParamSchema }), playerController.deletePlayer);
 
 export default router;

@@ -9,6 +9,7 @@ import teamRoutes from "./api/v1/routes/teamRoutes";
 import playerRoutes from "./api/v1/routes/playerRoutes";
 import statRoutes from "./api/v1/routes/statRoutes";
 import setupSwagger from "../config/swagger";
+import errorHandler from "./api/v1/middleware/errorHandler";
 
 const app: Express = express();
 
@@ -34,5 +35,7 @@ app.get("/api/v1/health", (req, res) => {
         version: "1.0.0",
     });
 });
+
+app.use(errorHandler);
 
 export default app;
