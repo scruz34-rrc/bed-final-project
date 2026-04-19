@@ -87,6 +87,7 @@ import Joi from "joi";
  *           type: boolean
  */
 export const createPlayerSchema = Joi.object({
+    id: Joi.string().optional(),
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
     position: Joi.string().required(),

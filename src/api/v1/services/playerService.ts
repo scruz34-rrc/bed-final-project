@@ -21,9 +21,16 @@ export const getPlayerById = async (id: string): Promise<Player | null> => {
     return { id: doc.id, ...doc.data() } as Player;
 };
 
-export const createPlayer = async (playerData: Omit<Player, "id">): Promise<Player> => {
-    const id = await repository.createDocument(COLLECTION, playerData);
-    return { id, ...playerData } as Player;
+export const createPlayer = async (playerData: Partial<Player> & { 
+    firstName: string; 
+    lastName: string; 
+    position: string; 
+    teamId: string; 
+    debutYear: number; 
+}): Promise<Player> => {
+    const { id: customId, ...dataWithoutId } = playerData;
+    const id = await repository.createDocument(COLLECTION, dataWithoutId, customId);
+    return { id, ...dataWithoutId } as Player;
 };
 
 export const updatePlayer = async (id: string, playerData: Partial<Omit<Player, "id">>): Promise<Player | null> => {
