@@ -11,7 +11,18 @@ export const getAllPlayers = async (
     try {
         const teamId = req.query.teamId as string | undefined;
         const players = await playerService.getAllPlayers(teamId);
-        res.status(HTTP_STATUS.OK).json(successResponse(players, "Players retrieved successfully"));
+        
+        const orderedPlayers = players.map(player => ({
+            id: player.id,
+            firstName: player.firstName,
+            lastName: player.lastName,
+            position: player.position,
+            teamId: player.teamId,
+            debutYear: player.debutYear,
+            isActive: player.isActive
+        }));
+        
+        res.status(HTTP_STATUS.OK).json(successResponse(orderedPlayers, "Players retrieved successfully"));
     }
     
     catch (error) {
@@ -30,7 +41,18 @@ export const getPlayerById = async (
             res.status(HTTP_STATUS.NOT_FOUND).json(errorResponse("Player not found", "PLAYER_NOT_FOUND"));
             return;
         }
-        res.status(HTTP_STATUS.OK).json(successResponse(player, "Player retrieved successfully"));
+        
+        const orderedPlayer = {
+            id: player.id,
+            firstName: player.firstName,
+            lastName: player.lastName,
+            position: player.position,
+            teamId: player.teamId,
+            debutYear: player.debutYear,
+            isActive: player.isActive
+        };
+        
+        res.status(HTTP_STATUS.OK).json(successResponse(orderedPlayer, "Player retrieved successfully"));
     }
     
     catch (error) {
@@ -45,7 +67,18 @@ export const createPlayer = async (
 ): Promise<void> => {
     try {
         const player = await playerService.createPlayer(req.body);
-        res.status(HTTP_STATUS.CREATED).json(successResponse(player, "Player created successfully"));
+        
+        const orderedPlayer = {
+            id: player.id,
+            firstName: player.firstName,
+            lastName: player.lastName,
+            position: player.position,
+            teamId: player.teamId,
+            debutYear: player.debutYear,
+            isActive: player.isActive
+        };
+        
+        res.status(HTTP_STATUS.CREATED).json(successResponse(orderedPlayer, "Player created successfully"));
     }
     
     catch (error) {
@@ -64,7 +97,18 @@ export const updatePlayer = async (
             res.status(HTTP_STATUS.NOT_FOUND).json(errorResponse("Player not found", "PLAYER_NOT_FOUND"));
             return;
         }
-        res.status(HTTP_STATUS.OK).json(successResponse(player, "Player updated successfully"));
+        
+        const orderedPlayer = {
+            id: player.id,
+            firstName: player.firstName,
+            lastName: player.lastName,
+            position: player.position,
+            teamId: player.teamId,
+            debutYear: player.debutYear,
+            isActive: player.isActive
+        };
+        
+        res.status(HTTP_STATUS.OK).json(successResponse(orderedPlayer, "Player updated successfully"));
     }
     
     catch (error) {

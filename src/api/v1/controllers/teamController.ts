@@ -10,7 +10,17 @@ export const getAllTeams = async (
 ): Promise<void> => {
     try {
         const teams = await teamService.getAllTeams();
-        res.status(HTTP_STATUS.OK).json(successResponse(teams, "Teams retrieved successfully"));
+        
+        const orderedTeams = teams.map(team => ({
+            id: team.id,
+            name: team.name,
+            city: team.city,
+            league: team.league,
+            foundedYear: team.foundedYear,
+            isActive: team.isActive
+        }));
+        
+        res.status(HTTP_STATUS.OK).json(successResponse(orderedTeams, "Teams retrieved successfully"));
     }
     
     catch (error) {
@@ -29,7 +39,17 @@ export const getTeamById = async (
             res.status(HTTP_STATUS.NOT_FOUND).json(errorResponse("Team not found", "TEAM_NOT_FOUND"));
             return;
         }
-        res.status(HTTP_STATUS.OK).json(successResponse(team, "Team retrieved successfully"));
+        
+        const orderedTeam = {
+            id: team.id,
+            name: team.name,
+            city: team.city,
+            league: team.league,
+            foundedYear: team.foundedYear,
+            isActive: team.isActive
+        };
+        
+        res.status(HTTP_STATUS.OK).json(successResponse(orderedTeam, "Team retrieved successfully"));
     }
     
     catch (error) {
@@ -44,7 +64,17 @@ export const createTeam = async (
 ): Promise<void> => {
     try {
         const team = await teamService.createTeam(req.body);
-        res.status(HTTP_STATUS.CREATED).json(successResponse(team, "Team created successfully"));
+        
+        const orderedTeam = {
+            id: team.id,
+            name: team.name,
+            city: team.city,
+            league: team.league,
+            foundedYear: team.foundedYear,
+            isActive: team.isActive
+        };
+        
+        res.status(HTTP_STATUS.CREATED).json(successResponse(orderedTeam, "Team created successfully"));
     }
     
     catch (error) {
@@ -63,7 +93,17 @@ export const updateTeam = async (
             res.status(HTTP_STATUS.NOT_FOUND).json(errorResponse("Team not found", "TEAM_NOT_FOUND"));
             return;
         }
-        res.status(HTTP_STATUS.OK).json(successResponse(team, "Team updated successfully"));
+        
+        const orderedTeam = {
+            id: team.id,
+            name: team.name,
+            city: team.city,
+            league: team.league,
+            foundedYear: team.foundedYear,
+            isActive: team.isActive
+        };
+        
+        res.status(HTTP_STATUS.OK).json(successResponse(orderedTeam, "Team updated successfully"));
     }
     
     catch (error) {

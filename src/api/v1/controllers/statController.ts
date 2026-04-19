@@ -10,7 +10,22 @@ export const getStatsByPlayer = async (
 ): Promise<void> => {
     try {
         const stats = await statService.getStatsByPlayerId(req.params.playerId);
-        res.status(HTTP_STATUS.OK).json(successResponse(stats, "Stats retrieved successfully"));
+        
+        const orderedStats = stats.map(stat => ({
+            id: stat.id,
+            playerId: stat.playerId,
+            season: stat.season,
+            teamId: stat.teamId,
+            gamesPlayed: stat.gamesPlayed,
+            atBats: stat.atBats,
+            hits: stat.hits,
+            walks: stat.walks,
+            homeRuns: stat.homeRuns,
+            runsBattedIn: stat.runsBattedIn,
+            battingAverage: stat.battingAverage
+        }));
+        
+        res.status(HTTP_STATUS.OK).json(successResponse(orderedStats, "Stats retrieved successfully"));
     }
     
     catch (error) {
@@ -29,7 +44,22 @@ export const getStatById = async (
             res.status(HTTP_STATUS.NOT_FOUND).json(errorResponse("Stat line not found", "STAT_NOT_FOUND"));
             return;
         }
-        res.status(HTTP_STATUS.OK).json(successResponse(stat, "Stat line retrieved successfully"));
+        
+        const orderedStat = {
+            id: stat.id,
+            playerId: stat.playerId,
+            season: stat.season,
+            teamId: stat.teamId,
+            gamesPlayed: stat.gamesPlayed,
+            atBats: stat.atBats,
+            hits: stat.hits,
+            walks: stat.walks,
+            homeRuns: stat.homeRuns,
+            runsBattedIn: stat.runsBattedIn,
+            battingAverage: stat.battingAverage
+        };
+        
+        res.status(HTTP_STATUS.OK).json(successResponse(orderedStat, "Stat line retrieved successfully"));
     }
     
     catch (error) {
@@ -44,7 +74,22 @@ export const createStat = async (
 ): Promise<void> => {
     try {
         const stat = await statService.createStat(req.params.playerId, req.body);
-        res.status(HTTP_STATUS.CREATED).json(successResponse(stat, "Stat line created successfully"));
+        
+        const orderedStat = {
+            id: stat.id,
+            playerId: stat.playerId,
+            season: stat.season,
+            teamId: stat.teamId,
+            gamesPlayed: stat.gamesPlayed,
+            atBats: stat.atBats,
+            hits: stat.hits,
+            walks: stat.walks,
+            homeRuns: stat.homeRuns,
+            runsBattedIn: stat.runsBattedIn,
+            battingAverage: stat.battingAverage
+        };
+        
+        res.status(HTTP_STATUS.CREATED).json(successResponse(orderedStat, "Stat line created successfully"));
     }
     
     catch (error) {
@@ -63,7 +108,22 @@ export const updateStat = async (
             res.status(HTTP_STATUS.NOT_FOUND).json(errorResponse("Stat line not found", "STAT_NOT_FOUND"));
             return;
         }
-        res.status(HTTP_STATUS.OK).json(successResponse(stat, "Stat line updated successfully"));
+        
+        const orderedStat = {
+            id: stat.id,
+            playerId: stat.playerId,
+            season: stat.season,
+            teamId: stat.teamId,
+            gamesPlayed: stat.gamesPlayed,
+            atBats: stat.atBats,
+            hits: stat.hits,
+            walks: stat.walks,
+            homeRuns: stat.homeRuns,
+            runsBattedIn: stat.runsBattedIn,
+            battingAverage: stat.battingAverage
+        };
+        
+        res.status(HTTP_STATUS.OK).json(successResponse(orderedStat, "Stat line updated successfully"));
     }
     
     catch (error) {
