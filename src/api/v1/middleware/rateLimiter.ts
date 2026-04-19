@@ -7,22 +7,14 @@ export const standardLimiter = rateLimit({
     max: 100,
     standardHeaders: true,
     legacyHeaders: false,
-    message: {
-        success: false,
-        error: {
-            message: "Too many requests, please try again later.",
-            code: "RATE_LIMIT_EXCEEDED",
-        },
-        timestamp: new Date().toISOString(),
-    },
     handler: (req: Request, res: Response) => {
-        res.status(HTTP_STATUS.TOO_MANY_REQUESTS || 429).json({
+        res.status(HTTP_STATUS.TOO_MANY_REQUESTS).json({
             success: false,
             error: {
                 message: "Too many requests, please try again later.",
                 code: "RATE_LIMIT_EXCEEDED",
             },
-            timestamp: new Date().toISOString(),
+            timestamp: new Date().toISOString()
         });
     },
 });
